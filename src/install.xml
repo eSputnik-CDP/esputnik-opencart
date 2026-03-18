@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="utf-8"?>
+<modification>
+	<name>Esputnik CDP for OpenCart</name>
+	<code>esputnik_cdp</code>
+	<version>1.0</version>
+	<author>esputnik.com</author>
+	<link>https://esputnik.com/</link>
+	<file path="catalog/controller/common/header.php">
+	<operation error="skip">
+		<search><![CDATA[$data['title'] =]]></search>
+		<add position="after"><![CDATA[
+		if ($this->config->get('esputnik_site_script')) {
+			$esputnik_site_script = $this->config->get('esputnik_site_script');
+			if (!empty($esputnik_site_script)) {
+				$data['esputnik_site_script'] = html_entity_decode($esputnik_site_script);
+			}
+			$esputnik_web_push_script = $this->config->get('esputnik_web_push_script');
+			if (!empty($esputnik_web_push_script)) {
+				$data['esputnik_web_push_script'] = html_entity_decode($esputnik_web_push_script);
+			}
+			$route = !empty($this->request->get['route']) ? $this->request->get['route'] : '';
+			$begin_checkout_routes = [
+				'checkout/cart',
+				'checkout/checkout',
+				'checkout/simplecheckout',
+				'checkout/unicheckout',
+				'checkout/uni_checkout',
+				'checkout/revcheckout',
+				'revolution/revcheckout',
+				'checkout/oct_fastorder',
+				'checkout/fastorder',
+				'checkout/onepcheckout',
+				'checkout/checkout_two_step',
+				'extension/module/buy',
+				'checkout/buy',
+				'extension/quickcheckout/checkout',
+				'lightcheckout/checkout',
+				'extension/module/custom',
+				'tmdqc/tmdcheckout',
+				'quickcheckout/checkout',
+			];
+			if (in_array($route, $begin_checkout_routes)) {
+				$data['esputnik_event'] = "<script>document.addEventListener('DOMContentLoaded', function() {if (typeof eS === 'function') { eS('sendEvent', 'StatusCartPage'); }})</script>";
+			}
+			if (in_array($route, ['common/home', ''])) {
+				$data['esputnik_event'] = "<script>document.addEventListener('DOMContentLoaded', function() {if (typeof eS === 'function') { eS('sendEvent', 'MainPage'); }})</script>";
+			}
+			if (in_array($route, ['error/not_found'])) {
+				$data['esputnik_event'] = "<script>document.addEventListener('DOMContentLoaded', function() {if (typeof eS === 'function') { eS('sendEvent', 'NotFound'); }})</script>";
+			}
+			if (isset($this->session->data['customer_id']) && empty($this->session->data['esputnik_customer_data'])) {
+				$this->load->model('extension/module/esputnik');
+				$this->model_extension_module_esputnik->sendCustomerData();
+				$this->session->data['esputnik_customer_data'] = true;
+			}
+		}
+		]]></add>
+	</operation>
+	</file>
+	<file path="catalog/view/theme/*/template/common/header*.tpl">
+		<operation error="skip">
+			<search><![CDATA[<body]]></search>
+			<add position="after"><![CDATA[
+			<?php if (!empty($esputnik_site_script)) { echo $esputnik_site_script; } ?>
+			<?php if (!empty($esputnik_web_push_script)) { echo $esputnik_web_push_script; } ?>
+			<?php if (!empty($esputnik_event)) { echo $esputnik_event; } ?>
+			]]></add>
+		</operation>
+	</file>
+	<file path="catalog/view/theme/*/template/common/header*.twig">
+		<operation error="skip">
+			<search><![CDATA[<body]]></search>
+			<add position="after"><![CDATA[
+			{% if esputnik_site_script %}{{ esputnik_site_script }}{% endif %}
+			{% if esputnik_web_push_script %}{{ esputnik_web_push_script }}{% endif %}
+			{% if esputnik_event %}{{ esputnik_event }}{% endif %}
+			]]></add>
+		</operation>
+	</file>
+	<file path="catalog/controller/product/product.php">
+		<operation error="skip">
+			<search><![CDATA[$data['tags'] = array();]]></search>
+			<add position="before"><![CDATA[
+				if ($this->config->get('esputnik_site_script')) {
+					$data['esputnik_event'] = json_encode([
+					'ProductPage' => [
+						'productKey' => (string)$product_info['product_id'],
+						'price' => (string)$this->currency->format($product_info['special'] ? $product_info['special'] : $product_info['price'], $this->session->data['currency'], '', false),
+						'isInStock' => $product_info['quantity'] > 0 ? 1 : 0
+					]], JSON_UNESCAPED_UNICODE);
+				}
+				]]>
+			</add>
+		</operation>
+	</file>
+	<file path="catalog/controller/checkout/cart.php">
+		<operation error="skip">
+			<search><![CDATA[$this->response->addHeader('Content-Type: application/json');]]></search>
+			<add position="before"><![CDATA[
+				if ($this->config->get('esputnik_site_script')) {
+					$this->load->model('extension/module/esputnik');
+					$this->model_extension_module_esputnik->sendCart();
+				}
+				]]>
+			</add>
+		</operation>
+	</file>
+	<file path="catalog/controller/account/wishlist.php">
+		<operation error="skip">
+			<search><![CDATA[$product_info = $this->model_catalog_product->getProduct($product_id);]]></search>
+			<add position="after"><![CDATA[
+				if ($this->config->get('esputnik_site_script') && $product_info) {
+					$this->load->model('extension/module/esputnik');
+					$this->model_extension_module_esputnik->addWishlist($product_info);
+				}
+				]]>
+			</add>
+		</operation>
+	</file>
+	<file path="catalog/view/theme/*/template/product/product.tpl">
+		<operation error="skip">
+			<search><![CDATA[<?php echo $footer; ?>]]></search>
+			<add position="before"><![CDATA[
+			<?php if (!empty($esputnik_event)) { ?>
+			<script>
+			if (typeof eS !== 'undefined') {
+				product_page_event = <?php echo $esputnik_event; ?>;
+				eS('sendEvent', 'ProductPage', product_page_event);
+			}			
+			</script>
+			<?php } ?>
+			]]></add>
+		</operation>
+	</file>
+	<file path="catalog/view/theme/*/template/product/product.twig">
+		<operation error="skip">
+			<search><![CDATA[{{ footer }}]]></search>
+			<add position="before"><![CDATA[
+			{% if esputnik_event %}
+			<script>
+			if (typeof eS !== 'undefined') {
+				product_page_event = {{ esputnik_event }};
+				eS('sendEvent', 'ProductPage', product_page_event);
+			}			
+			</script>
+			{% endif %}
+			]]></add>
+		</operation>
+	</file>
+	<file path="catalog/controller/product/search.php">
+		<operation error="skip">
+			<search><![CDATA[$data['sorts'] = array();]]></search>
+			<add position="before"><![CDATA[ 
+				if ($this->config->get('esputnik_site_script') && empty($results) && !empty($this->request->get['search'])) {
+					$data['esputnik_event'] = json_encode([
+					'SearchRequest' => [
+						'search' => (string)$this->request->get['search'],
+						'isFound' => 0
+					]], JSON_UNESCAPED_UNICODE);
+				}
+				]]>
+			</add>
+		</operation>
+	</file>
+	<file path="catalog/view/theme/*/template/product/search.tpl">
+		<operation error="skip">
+			<search><![CDATA[<?php echo $footer; ?>]]></search>
+			<add position="before"><![CDATA[
+		<?php if (!empty($esputnik_event)) { ?>
+			<script>
+			if (typeof eS !== 'undefined') {
+				search_page_event = <?php echo $esputnik_event; ?>;
+				eS('sendEvent', 'SearchRequest', search_page_event);
+			}			
+			</script>
+			<?php } ?>
+			]]></add>
+		</operation>
+	</file>
+	<file path="catalog/view/theme/*/template/product/search.twig">
+		<operation error="skip">
+			<search><![CDATA[{{ footer }}]]></search>
+			<add position="before"><![CDATA[
+			{% if esputnik_event %}
+			<script>
+			if (typeof eS !== 'undefined') {
+				search_page_event = {{ esputnik_event }};
+				eS('sendEvent', 'SearchRequest', search_page_event);
+			}			
+			</script>
+			{% endif %}
+			
+			]]></add>
+		</operation>
+	</file>
+	<file path="catalog/controller/product/category.php">
+		<operation error="skip">
+			<search><![CDATA[$data['sorts'] = array();]]></search>
+			<add position="before"><![CDATA[ 
+				if ($this->config->get('esputnik_site_script')) {
+					$data['esputnik_event'] = json_encode([
+					'CategoryPage' => [
+						'categoryKey' => html_entity_decode($category_info['name']),
+					]], JSON_UNESCAPED_UNICODE); 
+				}
+				]]>
+			</add>
+		</operation>
+	</file>
+	<file path="catalog/view/theme/*/template/product/category.tpl">
+		<operation error="skip">
+			<search><![CDATA[<?php echo $footer; ?>]]></search>
+			<add position="before"><![CDATA[
+			<?php if (!empty($esputnik_event)) { ?>
+			<script>
+			if (typeof eS !== 'undefined') {
+				category_page_event = <?php echo $esputnik_event; ?>;
+				eS('sendEvent', 'CategoryPage', category_page_event);
+			}			
+			</script>
+			<?php } ?>
+			]]></add>
+		</operation>
+	</file>
+	<file path="catalog/view/theme/*/template/product/category.twig">
+		<operation error="skip">
+			<search><![CDATA[{{ footer }}]]></search>
+			<add position="before"><![CDATA[
+			{% if esputnik_event %}
+			<script>
+			if (typeof eS !== 'undefined') {
+				category_page_event = {{ esputnik_event }};
+				eS('sendEvent', 'CategoryPage', category_page_event);
+			}			
+			</script>
+			{% endif %}
+			]]></add>
+		</operation>
+	</file>
+	<file path="catalog/model/checkout/order.php"> 
+		<operation error="skip">
+			<search><![CDATA[$this->db->query("UPDATE `" . DB_PREFIX . "order` SET order_status_id = '" . (int)$order_status_id]]></search>
+			<add position="after"><![CDATA[
+		if ($this->config->get('esputnik_site_script') && $order_info['order_status_id'] == 0 && $order_status_id > 0) {
+			$this->load->model('extension/module/esputnik');
+			$this->model_extension_module_esputnik->sendOrder($order_id, $order_info);
+		}]]></add>
+		</operation>
+	</file>
+</modification>

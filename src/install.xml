@@ -53,6 +53,10 @@
 				$this->model_extension_module_esputnik->sendCustomerData();
 				$this->session->data['esputnik_customer_data'] = true;
 			}
+			if (!empty($this->session->data['esputnik_customer_data_event']) && is_array($this->session->data['esputnik_customer_data_event'])) {
+				$data['esputnik_customer_data'] = "<script>document.addEventListener('DOMContentLoaded', function() {if (typeof eS === 'function') { eS('sendEvent', 'CustomerData', " . json_encode(['CustomerData' => $this->session->data['esputnik_customer_data_event']], JSON_UNESCAPED_UNICODE) . "); }})</script>";
+				unset($this->session->data['esputnik_customer_data_event']);
+			}
 		}
 		]]></add>
 	</operation>
@@ -64,6 +68,7 @@
 			<?php if (!empty($esputnik_site_script)) { echo $esputnik_site_script; } ?>
 			<?php if (!empty($esputnik_web_push_script)) { echo $esputnik_web_push_script; } ?>
 			<?php if (!empty($esputnik_event)) { echo $esputnik_event; } ?>
+			<?php if (!empty($esputnik_customer_data)) { echo $esputnik_customer_data; } ?>
 			]]></add>
 		</operation>
 	</file>
@@ -74,6 +79,7 @@
 			{% if esputnik_site_script %}{{ esputnik_site_script }}{% endif %}
 			{% if esputnik_web_push_script %}{{ esputnik_web_push_script }}{% endif %}
 			{% if esputnik_event %}{{ esputnik_event }}{% endif %}
+			{% if esputnik_customer_data %}{{ esputnik_customer_data }}{% endif %}
 			]]></add>
 		</operation>
 	</file>

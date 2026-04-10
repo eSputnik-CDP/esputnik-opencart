@@ -39,7 +39,7 @@ The module automatically configures Esputnik's Web Tracking capabilities through
 * **Error Handling:** Failures at any stage are intercepted. The system logs specific errors. Even if the OCMOD injection fails, the storefront continues to operate normally without breaking frontend performance. If the script installation fails the user will be able to try again.
 * **Behavioral Events & Triggers:** After successful configuration, the following events are automatically tracked:
 	* *Backend Events:* `StatusCart`, `PurchasedItems`, `CustomerData`, `AddToWishlist`.
-	* *Frontend Events:* `StatusCartPage`, `MainPage`, `NotFound`, `ProductPage`, `SearchRequest`, `CategoryPage`.
+	* *Frontend Events:* `CustomerData`, `StatusCartPage`, `MainPage`, `NotFound`, `ProductPage`, `SearchRequest`, `CategoryPage`.
 * **Important Note on Product Variants:** Across all tracking events, only the primary `product_id` is utilized. OpenCart's core architecture treats product options (e.g., size, color) as modifiers attached to a main product, rather than standalone entities with distinct, uniquely identifiable IDs. Consequently, reliably extracting unique identifiers for specific option combinations to track them individually or to construct a comprehensive product feed for every variant is technically complex and unsupported natively without profound custom modifications.
 
 ### 4. Automated Web Push Configuration

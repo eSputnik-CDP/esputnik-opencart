@@ -1,24 +1,24 @@
-<?php echo $header; ?><?php echo $column_left; ?>
+{{ header }}{{ column_left }}
 <div id="content">
 	<div class="page-header">
 		<div class="container-fluid">
 			<div class="pull-right">
-				<a href="<?php echo $cancel; ?>" data-toggle="tooltip" title="<?php echo $button_cancel; ?>" class="btn btn-default"><i class="fa fa-reply"></i></a>
+				<a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default"><i class="fa fa-reply"></i></a>
 			</div>
-			<h1><?php echo $heading_title; ?></h1>
+			<h1>{{ heading_title }}</h1>
 			<ul class="breadcrumb">
-				<?php foreach ($breadcrumbs as $breadcrumb) { ?>
-				<li><a href="<?php echo $breadcrumb['href']; ?>"><?php echo $breadcrumb['text']; ?></a></li>
-				<?php } ?>
+				{% for breadcrumb in breadcrumbs %}
+				<li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+				{% endfor %}
 			</ul>
 		</div>
 	</div>
 	<div class="container-fluid">
-		<?php if ($error_warning) { ?>
-		<div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> <?php echo $error_warning; ?>
+		{% if error_warning %}
+		<div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
 			<button type="button" class="close" data-dismiss="alert">&times;</button>
 		</div>
-		<?php } ?>
+		{% endif %}
 		
 		<div class="panel panel-default" style="border:none; box-shadow:none; background:transparent;">
 			<div class="panel-heading top-panel-heading" id="original-logo-header">
@@ -34,23 +34,23 @@
 				</defs>
 				</svg>
 			</div>
-			<div class="panel-body" id="sync-form-container" <?php if ($esputnik_api_key) { ?>style="display:none;"<?php } ?>>
-				<form action="<?php echo $action; ?>" method="post" enctype="multipart/form-data" id="form-esputnik" class="form-horizontal">
+			<div class="panel-body" id="sync-form-container" {% if esputnik_api_key %}style="display:none;"{% endif %}>
+				<form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-esputnik" class="form-horizontal">
 					<div class="sync-card custom-sync-form" style="background:#fff; border:1px solid #ddd;">
 						<div class="api-form">
-							<h2><?php echo $text_data_sync; ?></h2>
-							<p class="text-heading"><?php echo $text_in_head; ?></p>
+							<h2>{{ text_data_sync }}</h2>
+							<p class="text-heading">{{ text_in_head }}</p>
 							<div class="form-group" style="margin:0;">
-								<label class="control-label" for="input-api-key"><?php echo $entry_api_key; ?></label>
-								<input type="text" name="temp_api_key" id="input-api-key" class="form-control custom-input" value="<?php echo $esputnik_api_key; ?>" />
+								<label class="control-label" for="input-api-key">{{ entry_api_key }}</label>
+								<input type="text" name="temp_api_key" id="input-api-key" class="form-control custom-input" value="{{ esputnik_api_key }}" />
 								<div class="help-text">
-									<?php echo $text_key_help; ?>
+									{{ text_key_help }}
 								</div>
 								<div id="initial-error-log"></div>
 							</div>
 							<div class="form-group" style="margin:0;">
 								<button type="button" id="button-sync" class="btn btn-primary btn-lg custom-btn">
-									<?php echo $button_sync; ?>
+									{{ button_sync }}
 								</button>
 							</div>
 						</div>
@@ -58,7 +58,7 @@
 				</form>
 			</div>
 
-			<div class="esputnik-steps-container" id="integration-steps" <?php if (!$esputnik_api_key) { ?>style="display:none;"<?php } ?>>
+			<div class="esputnik-steps-container" id="integration-steps" {% if not esputnik_api_key %}style="display:none;"{% endif %}>
 				
 				<div class="step-card" id="step-account">
 					<div class="step-icon">
@@ -68,16 +68,16 @@
 						<img src="view/image/esputnik/esputnik-error.png" class="status-error status-icon" style="display:none;" alt="error">
 					</div>
 					<div class="step-content">
-						<h4 class="step-title"><?php echo $text_account_connection; ?></h4>
-						<p class="text-muted status-success-msg" style="margin:0; display:none;"><?php echo $text_api_key_connected; ?> <strong><span id="org-name"><?php echo $esputnik_orgname; ?></span></strong></p>
+						<h4 class="step-title">{{ text_account_connection }}</h4>
+						<p class="text-muted status-success-msg" style="margin:0; display:none;">{{ text_api_key_connected }} <strong><span id="org-name">{{ esputnik_orgname }}</span></strong></p>
 						
 						<div class="status-error-msg" style="display:none;">
-							<p class="text-muted" style="color: #666; margin: 0;"><?php echo $error_api_key; ?></p>
+							<p class="text-muted" style="color: #666; margin: 0;">{{ error_api_key }}</p>
 						</div>
 					</div>
 					<div class="step-action">
-						<a href="<?php echo $disconnect; ?>" class="btn btn-default btn-disconnect" style="display:none;" onclick="return confirm('<?php echo $text_you_sure; ?>');"><?php echo $text_disconnect; ?></a>
-						<a href="<?php echo $disconnect; ?>" class="btn btn-primary btn-try-again" style="display:none;"><?php echo $text_try_again; ?></a>
+						<a href="{{ disconnect }}" class="btn btn-default btn-disconnect" style="display:none;" onclick="return confirm('{{ text_you_sure }}');">{{ text_disconnect }}</a>
+						<a href="{{ disconnect }}" class="btn btn-primary btn-try-again" style="display:none;">{{ text_try_again }}</a>
 					</div>
 				</div>
 
@@ -89,14 +89,14 @@
 						<img src="view/image/esputnik/esputnik-error.png" class="status-error status-icon" style="display:none;" alt="error">
 					</div>
 					<div class="step-content">
-						<h4 class="step-title"><?php echo $text_web_tracking; ?></h4>
-						<p class="text-muted success-msg" style="display:none; margin:0;"><?php echo $text_site_script_installed; ?></p>
-						<p class="text-muted error-msg" style="display:none; margin:0;"><?php echo $error_site_script; ?></p>
+						<h4 class="step-title">{{ text_web_tracking }}</h4>
+						<p class="text-muted success-msg" style="display:none; margin:0;">{{ text_site_script_installed }}</p>
+						<p class="text-muted error-msg" style="display:none; margin:0;">{{ error_site_script }}</p>
 					</div>
 					<div class="step-action">
 						 <div class="error-actions" style="display:none; display:flex; gap:10px;">
-							<a href="https://esputnik.io/contact-us" target="_blank" class="btn btn-default btn-support"><?php echo $button_support; ?></a>
-							<button type="button" class="btn btn-primary btn-retry-step btn-tryagain"><?php echo $text_try_again; ?></button>
+							<a href="https://esputnik.com/contact-us" target="_blank" class="btn btn-default btn-support">{{ button_support }}</a>
+							<button type="button" class="btn btn-primary btn-retry-step btn-tryagain">{{ text_try_again }}</button>
 						 </div>
 					</div>
 				</div>
@@ -109,14 +109,14 @@
 						<img src="view/image/esputnik/esputnik-error.png" class="status-error status-icon" style="display:none;" alt="error">
 					</div>
 					<div class="step-content">
-						<h4 class="step-title"><?php echo $text_web_push; ?></h4>
-						<p class="text-muted success-msg" style="display:none; margin:0;"><?php echo $text_web_push_success; ?></p>
-						<p class="text-muted error-msg" style="display:none; margin:0;"><?php echo $error_web_push; ?></p>
+						<h4 class="step-title">{{ text_web_push }}</h4>
+						<p class="text-muted success-msg" style="display:none; margin:0;">{{ text_web_push_success }}</p>
+						<p class="text-muted error-msg" style="display:none; margin:0;">{{ error_web_push }}</p>
 					</div>
 					<div class="step-action">
 						 <div class="error-actions" style="display:none; display:flex; gap:10px;">
-							<a href="https://esputnik.com/contact-us" target="_blank" class="btn btn-default btn-support"><?php echo $button_support; ?></a>
-							<button type="button" class="btn btn-primary btn-retry-step btn-tryagain"><?php echo $text_try_again; ?></button>
+							<a href="https://esputnik.com/contact-us" target="_blank" class="btn btn-default btn-support">{{ button_support }}</a>
+							<button type="button" class="btn btn-primary btn-retry-step btn-tryagain">{{ text_try_again }}</button>
 						 </div>
 					</div>
 				</div>
@@ -129,20 +129,20 @@
 						<img src="view/image/esputnik/esputnik-error.png" class="status-error status-icon" style="display:none;" alt="error">
 					</div>
 					<div class="step-content" style="flex-grow: 1; padding-right: 15px;">
-						<h4 class="step-title"><?php echo $text_import_history; ?></h4>
+						<h4 class="step-title">{{ text_import_history }}</h4>
 						
 						<div class="import-wrapper">
-							<p class="text-muted import-desc status-loading-msg" style="display:none; margin:0;"><?php echo $text_first_export; ?></p>
-							<p class="text-muted import-desc status-success-msg" style="display:none; margin:0;"><?php echo $text_import_success; ?></p>
+							<p class="text-muted import-desc status-loading-msg" style="display:none; margin:0;">{{ text_first_export }}</p>
+							<p class="text-muted import-desc status-success-msg" style="display:none; margin:0;">{{ text_import_success }}</p>
 							<p class="text-danger import-error-msg" style="display:none; margin-top:5px; line-height: 1.4;"></p>
 							
 							<div class="import-stats-table">
 								<div class="stat-row header">
 									<div class="col-name"></div>
-									<div class="col-val"><?php echo $text_loading_total; ?></div>
-									<div class="col-val"><?php echo $text_loading_synchronized; ?></div>
-									<div class="col-val"><?php echo $text_loading_success; ?></div>
-									<div class="col-val"><?php echo $text_loading_failed; ?></div>
+									<div class="col-val">{{ text_loading_total }}</div>
+									<div class="col-val">{{ text_loading_synchronized }}</div>
+									<div class="col-val">{{ text_loading_success }}</div>
+									<div class="col-val">{{ text_loading_failed }}</div>
 								</div>
 								<div class="stat-row">
 									<div class="col-name" style="display: flex; align-items: center; gap: 10px;">
@@ -152,7 +152,7 @@
 											<img src="view/image/esputnik/esputnik-success.png" class="status-success status-icon-sm" style="display:none;" alt="success">
 											<img src="view/image/esputnik/esputnik-error.png" class="status-error status-icon-sm" style="display:none;" alt="error">
 										</div>
-										<?php echo $text_contacts; ?>
+										{{ text_contacts }}
 									</div>
 									<div class="col-val" id="val-customers-total">-</div>
 									<div class="col-val" id="val-customers-synced">-</div>
@@ -167,7 +167,7 @@
 											<img src="view/image/esputnik/esputnik-success.png" class="status-success status-icon-sm" style="display:none;" alt="success">
 											<img src="view/image/esputnik/esputnik-error.png" class="status-error status-icon-sm" style="display:none;" alt="error">
 										</div>
-										 <?php echo $text_orders; ?>
+										 {{ text_orders }}
 									</div>
 									<div class="col-val" id="val-orders-total">-</div>
 									<div class="col-val" id="val-orders-synced">-</div>
@@ -179,31 +179,33 @@
 					</div>
 					<div class="step-action">
 						 <div class="error-actions" style="display:none; display:flex; gap:10px;">
-							<button type="button" class="btn btn-primary btn-retry-import btn-tryagain"><?php echo $text_try_again; ?></button>
+							<button type="button" class="btn btn-primary btn-retry-import btn-tryagain">{{ text_try_again }}</button>
 						 </div>
 					</div>
 				</div>
 
 			</div>
+			
 			<div class="panel panel-default" id="app-inbox-container" style="display:none;">
 				<div class="panel-body">
 					<div>
 						<h4 class="step-title" style="display: flex; align-items: center;">
-							<?php echo $text_app_inbox; ?>
-							<span id="badge-app-inbox" class="badge-status <?php if ($esputnik_app_inbox == '1') { ?>enabled<?php } else { ?>disabled<?php } ?>">
-								<?php if ($esputnik_app_inbox == '1') { ?><?php echo $text_enabled; ?><?php } else { ?><?php echo $text_disabled; ?><?php } ?>
+							{{ text_app_inbox }}
+							<span id="badge-app-inbox" class="badge-status {% if esputnik_app_inbox == '1' %}enabled{% else %}disabled{% endif %}">
+								{% if esputnik_app_inbox == '1' %}{{ text_enabled }}{% else %}{{ text_disabled }}{% endif %}
 							</span>
 						</h4>
-						<p class="text-muted"><?php echo $text_app_inbox_more; ?></p>
+						<p class="text-muted">{{ text_app_inbox_more }}</p>
 					</div>
 					<div>
-						<button type="button" id="btn-app-inbox" class="btn btn-default" data-status="<?php echo $esputnik_app_inbox; ?>">
-							<?php if ($esputnik_app_inbox == '1') { ?><?php echo $button_disable; ?><?php } else { ?><?php echo $button_enable; ?><?php } ?>
+						<button type="button" id="btn-app-inbox" class="btn btn-default" data-status="{{ esputnik_app_inbox }}">
+							{% if esputnik_app_inbox == '1' %}{{ button_disable }}{% else %}{{ button_enable }}{% endif %}
 						</button>
 					</div>
 				</div>
 			</div>
-			<div class="made text-right" style="margin-top: 20px;"><?php echo $text_made; ?></div>
+			
+			<div class="made text-right" style="margin-top: 20px;">{{ text_made }}</div>
 		</div>
 	</div>
 </div>
@@ -253,37 +255,37 @@
 </style>
 
 <script type="text/javascript">
-var hasApiKey = <?php echo $esputnik_api_key ? 'true' : 'false'; ?>;
-var isModuleActive = <?php echo $esputnik_status == '1' ? 'true' : 'false'; ?>;
-var hasSiteScript = <?php echo $esputnik_site_script ? 'true' : 'false'; ?>;
-var hasWebPush = <?php echo $esputnik_web_push ? 'true' : 'false'; ?>;
+var hasApiKey = {% if esputnik_api_key %}true{% else %}false{% endif %};
+var isModuleActive = {% if esputnik_status == '1' %}true{% else %}false{% endif %};
+var hasSiteScript = {% if esputnik_site_script %}true{% else %}false{% endif %};
+var hasWebPush = {% if esputnik_web_push %}true{% else %}false{% endif %};
 
-var custLoaded = ('<?php echo $esputnik_customers_loaded; ?>' === '1');
-var ordersLoaded = ('<?php echo $esputnik_orders_loaded; ?>' === '1');
+var custLoaded = ('{{ esputnik_customers_loaded }}' === '1');
+var ordersLoaded = ('{{ esputnik_orders_loaded }}' === '1');
 
-var rawCustPage = '<?php echo $esputnik_customers_page; ?>'.replace(/\D/g, '');
+var rawCustPage = '{{ esputnik_customers_page }}'.replace(/\D/g, '');
 var custPage = parseInt(rawCustPage, 10) || 1;
 
-var rawCustLimit = '<?php echo $customers_limit; ?>'.replace(/\D/g, '');
+var rawCustLimit = '{{ customers_limit }}'.replace(/\D/g, '');
 var custLimit = parseInt(rawCustLimit, 10) || 2000;
 
-var rawOrdersPage = '<?php echo $esputnik_orders_page; ?>'.replace(/\D/g, '');
+var rawOrdersPage = '{{ esputnik_orders_page }}'.replace(/\D/g, '');
 var ordersPage = parseInt(rawOrdersPage, 10) || 1;
 
-var rawOrdersLimit = '<?php echo $orders_limit; ?>'.replace(/\D/g, '');
+var rawOrdersLimit = '{{ orders_limit }}'.replace(/\D/g, '');
 var ordersLimit = parseInt(rawOrdersLimit, 10) || 300;
 
 var customersStats = { 
-	total: parseInt('<?php echo $total_customers_db; ?>'.replace(/\D/g, ''), 10) || 0, 
+	total: parseInt('{{ total_customers_db }}'.replace(/\D/g, ''), 10) || 0, 
 	synced: 0, 
 	success: 0, 
-	failed: parseInt('<?php echo $esputnik_bad_customers; ?>'.replace(/\D/g, ''), 10) || 0 
+	failed: parseInt('{{ esputnik_bad_customers }}'.replace(/\D/g, ''), 10) || 0 
 };
 var ordersStats = { 
-	total: parseInt('<?php echo $total_orders_db; ?>'.replace(/\D/g, ''), 10) || 0, 
+	total: parseInt('{{ total_orders_db }}'.replace(/\D/g, ''), 10) || 0, 
 	synced: 0, 
 	success: 0, 
-	failed: parseInt('<?php echo $esputnik_bad_orders; ?>'.replace(/\D/g, ''), 10) || 0 
+	failed: parseInt('{{ esputnik_bad_orders }}'.replace(/\D/g, ''), 10) || 0 
 };
 
 var isCustomersDone = false;
@@ -307,7 +309,7 @@ function verifyApiKeyOnLoad() {
 	setStepStatus('step-account', 'loading');
 	
 	$.ajax({
-		url: '<?php echo $check_api_key; ?>',
+		url: '{{ check_api_key }}',
 		type: 'post',
 		data: { api_key: apiKey },
 		dataType: 'json',
@@ -361,14 +363,14 @@ $('#button-sync').on('click', function() {
 	$('#initial-error-log').empty();
 
 	if (!apiKey) {
-		showInitialError('<?php echo $error_api_key_required; ?>');
+		showInitialError('{{ error_api_key_required }}');
 		return;
 	}
 	
 	$btn.button('loading');
 	
 	$.ajax({
-		url: '<?php echo $check_api_key; ?>',
+		url: '{{ check_api_key }}',
 		type: 'post',
 		data: { api_key: apiKey },
 		dataType: 'json',
@@ -401,12 +403,12 @@ $('#button-sync').on('click', function() {
 				startProcesses(); 
 			} else {
 				$btn.button('reset');
-				showInitialError('<?php echo $error_api_key; ?>');
+				showInitialError('{{ error_api_key }}');
 			}
 		},
 		error: function() {
 			$btn.button('reset');
-			showInitialError('<?php echo $error_connection; ?>');
+			showInitialError('{{ error_connection }}');
 		}
 	});
 });
@@ -532,7 +534,7 @@ function checkImportCompletion() {
 		
 		if (!isModuleActive) {
 			$.ajax({
-				url: '<?php echo $set_active; ?>',
+				url: '{{ set_active }}',
 				type: 'post',
 				dataType: 'json',
 				success: function(json) {
@@ -553,7 +555,7 @@ function handleImportError(type, msg) {
 	setStepStatus('step-import', 'error');
 	
 	var $errorBox = $('.import-error-msg');
-	var prefix = (type === 'customers') ? '<?php echo $text_failed; ?> <?php echo $text_contacts; ?>' : '<?php echo $text_failed; ?> <?php echo $text_orders; ?>';
+	var prefix = (type === 'customers') ? '{{ text_failed }} {{ text_contacts }}' : '{{ text_failed }} {{ text_orders }}';
 	var currentHtml = $errorBox.html();
 	
 	if (currentHtml && currentHtml.indexOf(prefix) === -1) {
@@ -568,7 +570,7 @@ function handleImportError(type, msg) {
 function getSiteScript(retryCount) {
 	setStepStatus('step-tracking', 'loading');
 	$.ajax({
-		url: '<?php echo $get_site_script; ?>',
+		url: '{{ get_site_script }}',
 		type: 'post',
 		dataType: 'json',
 		success: function(json) {
@@ -597,7 +599,7 @@ function getSiteScript(retryCount) {
 function addWebPush(retryCount) {
 	setStepStatus('step-push', 'loading');
 	$.ajax({
-		url: '<?php echo $add_web_push; ?>',
+		url: '{{ add_web_push }}',
 		type: 'post',
 		dataType: 'json',
 		success: function(json) {
@@ -649,7 +651,7 @@ function startImports() {
 
 function loadCustomers(page) {
 	$.ajax({
-		url: '<?php echo $load_customers; ?>',
+		url: '{{ load_customers }}',
 		type: 'post',
 		data: { page: page },
 		dataType: 'json',
@@ -685,7 +687,7 @@ function loadCustomers(page) {
 				if (custRetries <= maxRetries) {
 					setTimeout(function() { loadCustomers(page); }, 3000);
 				} else {
-					handleImportError('customers', '<?php echo $error_connection; ?>');
+					handleImportError('customers', '{{ error_connection }}');
 				}
 			}
 		},
@@ -694,7 +696,7 @@ function loadCustomers(page) {
 			if (custRetries <= maxRetries) {
 				setTimeout(function() { loadCustomers(page); }, 3000);
 			} else {
-				handleImportError('customers', '<?php echo $error_connection; ?>');
+				handleImportError('customers', '{{ error_connection }}');
 			}
 		}
 	});
@@ -702,7 +704,7 @@ function loadCustomers(page) {
 
 function loadOrders(page) {
 	$.ajax({
-		url: '<?php echo $load_orders; ?>',
+		url: '{{ load_orders }}',
 		type: 'post',
 		data: { page: page },
 		dataType: 'json',
@@ -738,7 +740,7 @@ function loadOrders(page) {
 				if (ordersRetries <= maxRetries) {
 					setTimeout(function() { loadOrders(page); }, 3000);
 				} else {
-					handleImportError('orders', '<?php echo $error_connection; ?>');
+					handleImportError('orders', '{{ error_connection }}');
 				}
 			}
 		},
@@ -747,7 +749,7 @@ function loadOrders(page) {
 			if (ordersRetries <= maxRetries) {
 				setTimeout(function() { loadOrders(page); }, 3000);
 			} else {
-				handleImportError('orders', '<?php echo $error_connection; ?>');
+				handleImportError('orders', '{{ error_connection }}');
 			}
 		}
 	});
@@ -784,17 +786,17 @@ $('#btn-app-inbox').on('click', function() {
 	$btn.prop('disabled', true);
 	
 	$.ajax({
-		url: '<?php echo $toggle_app_inbox; ?>',
+		url: '{{ toggle_app_inbox }}',
 		type: 'post',
 		dataType: 'json',
 		success: function(json) {
 			if (json['success']) {
 				if (json['new_status'] === '1') {
-					$btn.attr('data-status', '1').text('<?php echo $button_disable; ?>');
-					$('#badge-app-inbox').removeClass('disabled').addClass('enabled').text('<?php echo $text_enabled; ?>');
+					$btn.attr('data-status', '1').text('{{ button_disable }}');
+					$('#badge-app-inbox').removeClass('disabled').addClass('enabled').text('{{ text_enabled }}');
 				} else {
-					$btn.attr('data-status', '0').text('<?php echo $button_enable; ?>');
-					$('#badge-app-inbox').removeClass('enabled').addClass('disabled').text('<?php echo $text_disabled; ?>');
+					$btn.attr('data-status', '0').text('{{ button_enable }}');
+					$('#badge-app-inbox').removeClass('enabled').addClass('disabled').text('{{ text_disabled }}');
 				}
 			}
 			$btn.prop('disabled', false);
@@ -805,4 +807,4 @@ $('#btn-app-inbox').on('click', function() {
 	});
 });
 </script>
-<?php echo $footer; ?>
+{{ footer }}

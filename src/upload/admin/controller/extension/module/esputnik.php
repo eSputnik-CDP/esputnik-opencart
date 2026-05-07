@@ -1,14 +1,14 @@
 <?php
 class ControllerExtensionModuleEsputnik extends Controller {
 	private $error = [];
-	private $contacts_url = 'https://yespo.io/api/v1/contacts';
-	private $contact_url = 'https://yespo.io/api/v1/contact';
-	private $account_info_url = 'https://yespo.io/api/v1/account/info';
-	private $orders_url = 'https://yespo.io/api/v1/orders';
-	private $domains_url = 'https://yespo.io/api/v1/site/domains';
-	private $site_script_url = 'https://yespo.io/api/v1/site/script';
-	private $webpush_domain_url = 'https://yespo.io/api/v1/site/webpush/domain';
-	private $webpush_script_url = 'https://yespo.io/api/v1/site/webpush/script';
+	private $contacts_url = 'https://esputnik.com/api/v1/contacts';
+	private $contact_url = 'https://esputnik.com/api/v1/contact';
+	private $account_info_url = 'https://esputnik.com/api/v1/account/info';
+	private $orders_url = 'https://esputnik.com/api/v1/orders';
+	private $domains_url = 'https://esputnik.com/api/v1/site/domains';
+	private $site_script_url = 'https://esputnik.com/api/v1/site/script';
+	private $webpush_domain_url = 'https://esputnik.com/api/v1/site/webpush/domain';
+	private $webpush_script_url = 'https://esputnik.com/api/v1/site/webpush/script';
 
 	public function index() {
 		$this->load->language('extension/module/esputnik');

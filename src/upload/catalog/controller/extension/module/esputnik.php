@@ -1,8 +1,8 @@
 <?php
 class ControllerExtensionModuleEsputnik extends Controller {
-	private $contact_url = 'https://yespo.io/api/v1/contact';
-	private $orders_url = 'https://yespo.io/api/v1/orders';
-	private $token_url = 'https://yespo.io/api/v1/auth/contact/token';
+	private $contact_url = 'https://esputnik.com/api/v1/contact';
+	private $orders_url = 'https://esputnik.com/api/v1/orders';
+	private $token_url = 'https://esputnik.com/api/v1/auth/contact/token';
 
 	public function sendCustomer($customer_id) {
 		$this->load->model('account/customer');

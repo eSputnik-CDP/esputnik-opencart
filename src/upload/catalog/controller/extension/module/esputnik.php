@@ -1,7 +1,8 @@
 <?php
 class ControllerExtensionModuleEsputnik extends Controller {
-	private $contact_url = 'https://esputnik.com/api/v1/contact';
-	private $orders_url = 'https://esputnik.com/api/v1/orders';
+	private $contact_url = 'https://yespo.io/api/v1/contact';
+	private $orders_url = 'https://yespo.io/api/v1/orders';
+	private $token_url = 'https://yespo.io/api/v1/auth/contact/token';
 
 	public function sendCustomer($customer_id) {
 		$this->load->model('account/customer');
@@ -10,6 +11,7 @@ class ControllerExtensionModuleEsputnik extends Controller {
 		
 		if ($customer_info) {
 			$phone = preg_replace('/[^0-9]/', '', (string)$customer_info['telephone']); 
+			
 			$request_body = [
 				'externalCustomerId' => $customer_info['customer_id'],
 				'firstName' => $customer_info['firstname'],
@@ -87,9 +89,11 @@ class ControllerExtensionModuleEsputnik extends Controller {
 				}
 				
 				$status = 'INITIALIZED';
+				
 				if (is_array($in_progress_status) && isset($order_info['order_status_id']) && in_array($order_info['order_status_id'], $in_progress_status)) {
 					$status = 'IN_PROGRESS';
 				}
+				
 				if (is_array($delivered_status) && isset($order_info['order_status_id']) && in_array($order_info['order_status_id'], $delivered_status)) {
 					$status = 'DELIVERED';
 				}
@@ -131,7 +135,9 @@ class ControllerExtensionModuleEsputnik extends Controller {
 	public function checkBadOrdersAndCustomers() {
 		$limit = 20;
 		$interval = '15 MINUTE';
+		
 		$query_customers = $this->db->query("SELECT * FROM `" . DB_PREFIX . "esputnik_failed_customers` WHERE `last_attempt` < (NOW() - INTERVAL " . $interval . ") LIMIT " . (int)$limit);
+		
 		if ($query_customers->num_rows) {
 			foreach ($query_customers->rows as $row) {
 				$result = $this->sendCustomer((int)$row['customer_id']);
@@ -140,7 +146,9 @@ class ControllerExtensionModuleEsputnik extends Controller {
 				}
 			}
 		}
+		
 		$query_orders = $this->db->query("SELECT * FROM `" . DB_PREFIX . "esputnik_failed_orders` WHERE `last_attempt` < (NOW() - INTERVAL " . $interval . ") LIMIT " . (int)$limit);
+		
 		if ($query_orders->num_rows) {
 			foreach ($query_orders->rows as $row) {
 				$result = $this->processOrder('', [(int)$row['order_id']], null);
@@ -149,5 +157,32 @@ class ControllerExtensionModuleEsputnik extends Controller {
 				}
 			}
 		}
+	}
+	
+	public function getAppInboxToken() {
+		$json = ['token' => ''];
+		
+		if ($this->customer->isLogged() && $this->request->server['REQUEST_METHOD'] == 'POST') {
+			$customer_id = (string)$this->customer->getId();
+			$email = $this->customer->getEmail();
+			$phone = preg_replace('/[^0-9]/', '', (string)$this->customer->getTelephone());
+			
+			$this->load->model('extension/module/esputnik');
+			
+			$request_body = [
+				'extid' => $customer_id,
+				'email' => $email,
+				'phone' => $phone
+			];
+			
+			$response = $this->model_extension_module_esputnik->makeRequest($request_body, $this->token_url);
+			
+			if (!empty($response['token'])) {
+				$json['token'] = $response['token'];
+			}
+		}
+		
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
 	}
 }

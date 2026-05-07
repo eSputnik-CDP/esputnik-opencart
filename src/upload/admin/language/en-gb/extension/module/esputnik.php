@@ -1,6 +1,6 @@
 <?php
 // Heading
-$_['heading_title']	= 'eSputnik CDP for OpenCart — Email Marketing & Automation';
+$_['heading_title'] = 'eSputnik CDP for OpenCart — Email Marketing & Automation';
 
 // Text
 $_['text_extension'] = 'Modules';
@@ -41,6 +41,8 @@ $_['text_import_history'] = 'Import contacts & orders history';
 $_['text_import_success'] = 'Data is successfully synchronized';
 $_['text_contacts'] = 'Contacts';
 $_['text_orders'] = 'Orders';
+$_['text_app_inbox'] = 'App Inbox';
+$_['text_app_inbox_more'] = 'App Inbox is a communication channel that allows you to deliver rich, personalized content to users directly on your mobile app or website.';
 
 // Entry
 $_['entry_status'] = 'Status';
@@ -50,6 +52,8 @@ $_['entry_api_key'] = 'API key';
 $_['button_connect'] = 'Connect';
 $_['button_sync'] = 'Synchronize';
 $_['button_support'] = 'Contact Support';
+$_['button_enable'] = 'Enable';
+$_['button_disable'] = 'Disable';
 
 // Error
 $_['error_permission']	= 'You do not have permission to make changes';

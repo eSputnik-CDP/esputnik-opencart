@@ -185,7 +185,24 @@
 				</div>
 
 			</div>
-			
+			<div class="panel panel-default" id="app-inbox-container" style="display:none;">
+				<div class="panel-body">
+					<div>
+						<h4 class="step-title" style="display: flex; align-items: center;">
+							<?php echo $text_app_inbox; ?>
+							<span id="badge-app-inbox" class="badge-status <?php if ($esputnik_app_inbox == '1') { ?>enabled<?php } else { ?>disabled<?php } ?>">
+								<?php if ($esputnik_app_inbox == '1') { ?><?php echo $text_enabled; ?><?php } else { ?><?php echo $text_disabled; ?><?php } ?>
+							</span>
+						</h4>
+						<p class="text-muted"><?php echo $text_app_inbox_more; ?></p>
+					</div>
+					<div>
+						<button type="button" id="btn-app-inbox" class="btn btn-default" data-status="<?php echo $esputnik_app_inbox; ?>">
+							<?php if ($esputnik_app_inbox == '1') { ?><?php echo $button_disable; ?><?php } else { ?><?php echo $button_enable; ?><?php } ?>
+						</button>
+					</div>
+				</div>
+			</div>
 			<div class="made text-right" style="margin-top: 20px;"><?php echo $text_made; ?></div>
 		</div>
 	</div>
@@ -227,6 +244,12 @@
 .stat-row.header { color: #999; font-size: 12px; text-transform: uppercase; border-bottom: 1px solid #eee; }
 .stat-row .col-name { width: 150px; font-weight: 500; }
 .stat-row .col-val { width: 120px; text-align: left; }
+#app-inbox-container { margin-top: 20px; border-radius: 3px; border: 1px solid #ddd; box-shadow: none; background: #fff; }
+#app-inbox-container .panel-body { display: flex; justify-content: left; align-items: center; padding: 20px; margin-left: 50px; margin-right: 20px; }
+#app-inbox-container button { padding: 8px 15px; border-radius: 4px; font-size: 16px; box-shadow: 0px 0px 2px 0px rgba(0, 0, 0, 0.25), 0px 2px 4px 0px rgba(0, 0, 0, 0.12); margin-left: 15px; }
+.badge-status { padding: 6px 8px; border-radius: 4px; font-size: 14px; font-weight: 500; margin-left: 10px; line-height: 1; }
+.badge-status.enabled { background-color: #abffc3; color: #0f5132; }
+.badge-status.disabled { background-color: #ffc7d1; color: #842029; }
 </style>
 
 <script type="text/javascript">
@@ -397,6 +420,7 @@ function startProcesses() {
 		getSiteScript(1);
 	} else {
 		setStepStatus('step-tracking', 'success');
+		$('#app-inbox-container').slideDown();
 	}
 
 	if (!hasWebPush) {
@@ -551,6 +575,7 @@ function getSiteScript(retryCount) {
 			if (json['success']) {
 				hasSiteScript = true;
 				setStepStatus('step-tracking', 'success');
+				$('#app-inbox-container').slideDown();
 			} else {
 				if (retryCount < maxRetries) {
 					setTimeout(function() { getSiteScript(retryCount + 1); }, 3000);
@@ -752,6 +777,32 @@ $('#step-import .btn-retry-import').on('click', function() {
 		updateImportUI('orders', 'loading');
 		loadOrders(ordersPage);
 	}
+});
+
+$('#btn-app-inbox').on('click', function() {
+	var $btn = $(this);
+	$btn.prop('disabled', true);
+	
+	$.ajax({
+		url: '<?php echo $toggle_app_inbox; ?>',
+		type: 'post',
+		dataType: 'json',
+		success: function(json) {
+			if (json['success']) {
+				if (json['new_status'] === '1') {
+					$btn.attr('data-status', '1').text('<?php echo $button_disable; ?>');
+					$('#badge-app-inbox').removeClass('disabled').addClass('enabled').text('<?php echo $text_enabled; ?>');
+				} else {
+					$btn.attr('data-status', '0').text('<?php echo $button_enable; ?>');
+					$('#badge-app-inbox').removeClass('enabled').addClass('disabled').text('<?php echo $text_disabled; ?>');
+				}
+			}
+			$btn.prop('disabled', false);
+		},
+		error: function() {
+			$btn.prop('disabled', false);
+		}
+	});
 });
 </script>
 <?php echo $footer; ?>

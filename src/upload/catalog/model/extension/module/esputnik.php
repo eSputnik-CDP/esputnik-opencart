@@ -23,7 +23,7 @@ class ModelExtensionModuleEsputnik extends Model {
 		if (isset($this->request->server['HTTP_USER_AGENT'])) {
 			$headers[] = 'User-Agent: ' . $this->request->server['HTTP_USER_AGENT'];
 		}
-		$response = $this->esputnik_http->requestJson('POST', 'https://tracker.esputnik.com/api/v2', $request_data, '', $headers);
+		$response = $this->esputnik_http->requestJson('POST', 'https://tracker.yespo.io/api/v2', $request_data, '', $headers);
 		$response_json = [
 			'text'      => $response['raw_response'],
 			'http_code' => $response['http_code']
@@ -94,7 +94,6 @@ class ModelExtensionModuleEsputnik extends Model {
 				$general_info['externalCustomerId'] = $order_info['customer_id'];
 			}
 		}
-		$this->session->data['esputnik_customer_data_event'] = $general_info;
 		$general_info['siteId'] = $this->config->get('esputnik_siteid');
 		$general_info['datetime'] = (int)(microtime(true) * 1000);
 		if (!empty($this->request->cookie['sc'])) {

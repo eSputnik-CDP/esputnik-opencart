@@ -1,14 +1,14 @@
 <?php
 class ControllerExtensionModuleEsputnik extends Controller {
 	private $error = [];
-	private $contacts_url = 'https://esputnik.com/api/v1/contacts';
-	private $contact_url = 'https://esputnik.com/api/v1/contact';
-	private $account_info_url = 'https://esputnik.com/api/v1/account/info';
-	private $orders_url = 'https://esputnik.com/api/v1/orders';
-	private $domains_url = 'https://esputnik.com/api/v1/site/domains';
-	private $site_script_url = 'https://esputnik.com/api/v1/site/script';
-	private $webpush_domain_url = 'https://esputnik.com/api/v1/site/webpush/domain';
-	private $webpush_script_url = 'https://esputnik.com/api/v1/site/webpush/script';
+	private $contacts_url = 'https://yespo.io/api/v1/contacts';
+	private $contact_url = 'https://yespo.io/api/v1/contact';
+	private $account_info_url = 'https://yespo.io/api/v1/account/info';
+	private $orders_url = 'https://yespo.io/api/v1/orders';
+	private $domains_url = 'https://yespo.io/api/v1/site/domains';
+	private $site_script_url = 'https://yespo.io/api/v1/site/script';
+	private $webpush_domain_url = 'https://yespo.io/api/v1/site/webpush/domain';
+	private $webpush_script_url = 'https://yespo.io/api/v1/site/webpush/script';
 
 	public function index() {
 		$this->load->language('extension/module/esputnik');
@@ -77,15 +77,16 @@ class ControllerExtensionModuleEsputnik extends Controller {
 	
 	private function getModuleLinks($token, $extension) {
 		return [
-			'action'          => $this->url->link('extension/module/esputnik', $token, true),
-			'cancel'          => $this->url->link($extension, $token . '&type=module', true),
-			'check_api_key'   => html_entity_decode($this->url->link('extension/module/esputnik/checkApiKey', $token, true)),
-			'load_customers'  => html_entity_decode($this->url->link('extension/module/esputnik/loadCustomers', $token, true)),
-			'load_orders'     => html_entity_decode($this->url->link('extension/module/esputnik/loadOrders', $token, true)),
-			'get_site_script' => html_entity_decode($this->url->link('extension/module/esputnik/getSiteScript', $token, true)),
-			'add_web_push'    => html_entity_decode($this->url->link('extension/module/esputnik/addWebPush', $token, true)),
-			'disconnect'      => html_entity_decode($this->url->link('extension/module/esputnik/disconnect', $token, true)),
-			'set_active'      => html_entity_decode($this->url->link('extension/module/esputnik/setActive', $token, true)),
+			'action'           => $this->url->link('extension/module/esputnik', $token, true),
+			'cancel'           => $this->url->link($extension, $token . '&type=module', true),
+			'check_api_key'    => html_entity_decode($this->url->link('extension/module/esputnik/checkApiKey', $token, true)),
+			'load_customers'   => html_entity_decode($this->url->link('extension/module/esputnik/loadCustomers', $token, true)),
+			'load_orders'      => html_entity_decode($this->url->link('extension/module/esputnik/loadOrders', $token, true)),
+			'get_site_script'  => html_entity_decode($this->url->link('extension/module/esputnik/getSiteScript', $token, true)),
+			'add_web_push'     => html_entity_decode($this->url->link('extension/module/esputnik/addWebPush', $token, true)),
+			'disconnect'       => html_entity_decode($this->url->link('extension/module/esputnik/disconnect', $token, true)),
+			'set_active'       => html_entity_decode($this->url->link('extension/module/esputnik/setActive', $token, true)),
+			'toggle_app_inbox' => html_entity_decode($this->url->link('extension/module/esputnik/toggleAppInbox', $token, true)),
 		];
 	}
 
@@ -97,6 +98,8 @@ class ControllerExtensionModuleEsputnik extends Controller {
 			'esputnik_orgname'          => $this->config->get('esputnik_orgname'),
 			'esputnik_site_script'      => $this->config->get('esputnik_site_script'),
 			'esputnik_web_push'         => $this->config->get('esputnik_web_push'),
+			'esputnik_web_push_script'  => $this->config->get('esputnik_web_push_script'),
+			'esputnik_app_inbox'        => $this->config->get('esputnik_app_inbox') ? $this->config->get('esputnik_app_inbox') : 0,
 			'esputnik_customers_page'   => $this->config->get('esputnik_customers_page') ? $this->config->get('esputnik_customers_page') : 1,
 			'esputnik_orders_page'      => $this->config->get('esputnik_orders_page') ? $this->config->get('esputnik_orders_page') : 1,
 			'esputnik_customers_loaded' => $this->config->get('esputnik_customers_loaded'),
@@ -440,48 +443,35 @@ class ControllerExtensionModuleEsputnik extends Controller {
 	}
 	
 	public function getSiteScript() {
-		
 		$json = ['success' => false];
-		
 		if ($this->request->server['REQUEST_METHOD'] !== 'POST' || !$this->validate()) {
 			$json['error'] = 'permission_or_method';
 			$this->respondJson($json);
 			return;
 		}
-		
 		$this->load->model('extension/module/esputnik');
 		$this->load->model('setting/setting');
-		
 		$domain = $this->request->server['SERVER_NAME'];
 		$request_body = ['domain' => $domain];
-		
 		$response = $this->model_extension_module_esputnik->makeRequest($request_body, $this->domains_url);
-		
 		if (empty($response['http_code']) || !in_array($response['http_code'], [200, 201])) {
 			$json['error'] = true;
 			$this->logApiEvent('ADD_DOMAIN_FAILED', 'ERROR', ['domain' => $domain, 'requestBody' => $request_body, 'responseBody' => $response]);
 			$this->respondJson($json);
 			return;
 		}
-		
 		$this->logApiEvent('ADD_DOMAIN_SUCCESS', 'INFO', ['domain' => $domain]);
-		
 		$this->model_setting_setting->editSettingValue('esputnik', 'esputnik_siteid', $response['siteId']);	
 		$json['siteid'] = $response['siteId'];	
-		
 		$script_response = $this->model_extension_module_esputnik->makePlainRequest($request_body, $this->site_script_url);
-		
 		if (empty($script_response['text']) || empty($script_response['http_code']) || !in_array($script_response['http_code'], [200])) {
 			$this->logApiEvent('GET_SCRIPT_FAILED', 'ERROR', ['domain' => $domain, 'requestBody' => $request_body, 'responseBody' => $script_response]);
 			$this->respondJson($json);
 			return;
 		}
-		
 		$this->model_setting_setting->editSettingValue('esputnik', 'esputnik_site_script', $script_response['text']);
 		$json['success'] = true;
-		
 		$this->logApiEvent('GET_SCRIPT_SUCCESS', 'INFO', ['domain' => $domain]);
-		
 		$this->respondJson($json);
 	}
 	
@@ -565,6 +555,37 @@ class ControllerExtensionModuleEsputnik extends Controller {
 		}
 	}
 	
+	public function toggleAppInbox() {
+		$json = ['success' => false];
+		
+		if ($this->request->server['REQUEST_METHOD'] == 'POST' && $this->validate()) {
+			$this->load->model('setting/setting');
+			
+			$current_status = $this->config->get('esputnik_app_inbox');
+			
+			if (is_null($current_status)) {
+				$this->db->query("INSERT INTO " . DB_PREFIX . "setting SET store_id = '" . (int)$this->config->get('config_store_id') . "', `code` = 'esputnik', `key` = 'esputnik_app_inbox', `value` = '0'");
+			}
+			
+			$new_status = $current_status == '1' ? '0' : '1';
+			
+			$this->model_setting_setting->editSettingValue('esputnik', 'esputnik_app_inbox', $new_status);
+			
+			$domain = $this->request->server['SERVER_NAME'];
+			
+			if ($new_status == '1') {
+				$this->logApiEvent('APP_INBOX_ENABLED', 'INFO', ['domain' => $domain]);
+			} else {
+				$this->logApiEvent('APP_INBOX_DISABLED', 'INFO', ['domain' => $domain]);
+			}
+			
+			$json['success'] = true;
+			$json['new_status'] = $new_status;
+		}
+		
+		$this->respondJson($json);
+	}
+	
 	protected function validate() {
 		if (!$this->user->hasPermission('modify', 'extension/module/esputnik')) {
 			$this->load->language('extension/module/esputnik');
@@ -590,6 +611,7 @@ class ControllerExtensionModuleEsputnik extends Controller {
 			'esputnik_site_script'      => '',
 			'esputnik_web_push'         => '',
 			'esputnik_web_push_script'  => '',
+			'esputnik_app_inbox'        => '0',
 			'esputnik_customers_limit'  => 2000,
 			'esputnik_orders_limit'     => 300,
 		];
@@ -644,6 +666,7 @@ class ControllerExtensionModuleEsputnik extends Controller {
 				'esputnik_site_script'      => '',
 				'esputnik_web_push'         => '',
 				'esputnik_web_push_script'  => '',
+				'esputnik_app_inbox'        => '0',
 				'esputnik_customers_limit'  => 2000,
 				'esputnik_orders_limit'     => 300,
 			];

@@ -20,8 +20,8 @@ class ModelExtensionModuleEsputnik extends Model {
 		$this->load->library('esputnik_http');
 		return $this->esputnik_http->requestRaw('GET', $event_url, $request_data, $password);
 	}
-	public function makeLogRequest($request_data = [], $orgid = '', $event_url = 'https://events.esputnik.io/logs/v1/plugin') {
 
+	public function makeLogRequest($request_data = [], $orgid = '', $event_url = 'https://events.yespo.io/logs/v1/plugin') {
 		$request_data['typeCMS'] = 'OpenCart';
 		$request_data['errorMessage'] = '';
 		$request_data['orgId'] = (int)$this->config->get('esputnik_orgid');

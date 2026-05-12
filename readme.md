@@ -13,6 +13,7 @@ The plugin implements:
 * Automatic registration of the store domain in eSputnik (to obtain general and web push scripts)
 * Automatic installation of the required scripts (site tracking, web push) and the service worker for push notifications on the site
 * Web tracking configuration for collecting user activity on the site (product page views, cart updates, purchases, etc.)
+* App Inbox script initialization and authentication token retrieval when the App Inbox toggle is enabled. 
 * Logging of errors and export status
 
 ---

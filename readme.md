@@ -97,6 +97,24 @@ Authorization is performed using the eSputnik API Key entered in the plugin sett
 
 ---
 
+## Automated APP Inbox Setup
+**Purpose:** Allows you to change the script initialization mode from or to [App Inbox](https://docs.esputnik.com/docs/app-inbox-setting-up)
+
+---
+
+#### Implementation:
+
+- Stores the enable flag to the database isAppInboxEnabled.
+- Change the script initialization mode to enable or disable App Inbox mode.
+
+#### Enabling App Inbox mode:
+
+- Open the Yespo app
+- Connect your Yespo account
+- Enable App Inbox mode in the **APP Inbox** section
+
+---
+
 ## Contact Synchronization
 
 ### Real-Time Synchronization

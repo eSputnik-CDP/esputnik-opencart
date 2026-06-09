@@ -122,11 +122,13 @@ class ControllerExtensionModuleEsputnik extends Controller {
 		if ($this->request->server['REQUEST_METHOD'] == 'POST' && $api_key && $this->validate()) {
 			$current_api_key = $this->config->get('esputnik_api_key');
 			$request = $this->model_extension_module_esputnik->makeRequest([], $this->account_info_url, 'GET', $api_key, true);
+			
 			if (!empty($request['orgId'])) {
 				$this->logApiEvent('ADD_API_KEY_SUCCESS', 'INFO', ['domain' => $this->request->server['SERVER_NAME']], $request['orgId']);
 				$json['success'] = true;
 				$json['org_name'] = $request['organisationName'];
 				$json['orgid'] = $request['orgId'];
+				
 				if ($current_api_key !== $api_key) {
 					$this->resetSettings($api_key, $request['orgId'], $request['organisationName']);
 					$json['reset'] = true;
@@ -303,6 +305,7 @@ class ControllerExtensionModuleEsputnik extends Controller {
 			$json['next_page'] = false;
 			$this->model_setting_setting->editSettingValue('esputnik', 'esputnik_customers_loaded', '1');
 		}
+		
 		$json['success'] = true;
 		$json['processed_count'] = count($contacts_payload);
 		$json['failed_count'] = $failed_count;
@@ -356,7 +359,9 @@ class ControllerExtensionModuleEsputnik extends Controller {
 		
 		foreach ($orders as $order) {
 			$items = [];
+			
 			$products = $this->model_sale_order->getOrderProducts($order['order_id']);
+			
 			if (is_array($products)) {
 				foreach ($products as $product) {
 					$items[] = [
@@ -367,13 +372,17 @@ class ControllerExtensionModuleEsputnik extends Controller {
 					];
 				}
 			}
+			
 			$status = 'INITIALIZED';
+			
 			if (is_array($in_progress_status) && in_array($order['order_status_id'], $in_progress_status)) {
 				$status = 'IN_PROGRESS';
 			}
+			
 			if (is_array($delivered_status) && in_array($order['order_status_id'], $delivered_status)) {
 				$status = 'DELIVERED';
 			}
+			
 			$order_data = [
 				'externalOrderId' => $order['order_id'],
 				'totalCost'       => $this->currency->format($order['total'], $this->config->get('config_currency'), '', false),
@@ -388,9 +397,11 @@ class ControllerExtensionModuleEsputnik extends Controller {
 				'paymentMethod'   => $order['payment_method'],
 				'items'           => $items,
 			];
+			
 			if ($order['customer_id'] > 0) {
 				$order_data['externalCustomerId'] = $order['customer_id'];
 			}
+			
 			$orders_payload[] = $order_data;
 		}
 		
@@ -399,6 +410,7 @@ class ControllerExtensionModuleEsputnik extends Controller {
 		$response = $this->model_extension_module_esputnik->makeRequest($request_body, $this->orders_url);
 		
 		$failed_count = 0;
+		
 		if (isset($response['failedOrders']) && is_array($response['failedOrders'])) {
 			$failed_count = count($response['failedOrders']);
 		}
@@ -409,6 +421,7 @@ class ControllerExtensionModuleEsputnik extends Controller {
 			} else {
 				$json['error'] = $this->language->get('error_connection');
 			}
+			
 			$this->logApiEvent('SEND_ORDERS_BULK_FAILED', 'ERROR', ['domain' => $this->request->server['SERVER_NAME'], 'requestBody' => $request_body, 'responseBody' => $response]);
 			$this->respondJson($json);
 			return;
@@ -426,7 +439,7 @@ class ControllerExtensionModuleEsputnik extends Controller {
 		$batch_end = ($start + $limit) > $json['total_orders'] ? $json['total_orders'] : ($start + $limit);
 		$batch_range = $start . '-' . $batch_end;
 		
-		$this->logApiEvent('SEND_ORDERS_INFO', 'INFO', ['domain' => $this->request->server['SERVER_NAME'], 'batchRange' => $batch_range, 'responseBody' => $response]);
+		$this->logApiEvent('SEND_ORDERS_BULK_SUCCESS', 'INFO', ['domain' => $this->request->server['SERVER_NAME'], 'batchRange' => $batch_range, 'responseBody' => $response]);
 		
 		if ($total_in_batch == $limit) {
 			$json['next_page'] = $page + 1;
@@ -444,34 +457,45 @@ class ControllerExtensionModuleEsputnik extends Controller {
 	
 	public function getSiteScript() {
 		$json = ['success' => false];
+		
 		if ($this->request->server['REQUEST_METHOD'] !== 'POST' || !$this->validate()) {
 			$json['error'] = 'permission_or_method';
 			$this->respondJson($json);
 			return;
 		}
+		
 		$this->load->model('extension/module/esputnik');
 		$this->load->model('setting/setting');
+		
 		$domain = $this->request->server['SERVER_NAME'];
 		$request_body = ['domain' => $domain];
+		
 		$response = $this->model_extension_module_esputnik->makeRequest($request_body, $this->domains_url);
+		
 		if (empty($response['http_code']) || !in_array($response['http_code'], [200, 201])) {
 			$json['error'] = true;
 			$this->logApiEvent('ADD_DOMAIN_FAILED', 'ERROR', ['domain' => $domain, 'requestBody' => $request_body, 'responseBody' => $response]);
 			$this->respondJson($json);
 			return;
 		}
+		
 		$this->logApiEvent('ADD_DOMAIN_SUCCESS', 'INFO', ['domain' => $domain]);
 		$this->model_setting_setting->editSettingValue('esputnik', 'esputnik_siteid', $response['siteId']);	
 		$json['siteid'] = $response['siteId'];	
+		
 		$script_response = $this->model_extension_module_esputnik->makePlainRequest($request_body, $this->site_script_url);
+		
 		if (empty($script_response['text']) || empty($script_response['http_code']) || !in_array($script_response['http_code'], [200])) {
 			$this->logApiEvent('GET_SCRIPT_FAILED', 'ERROR', ['domain' => $domain, 'requestBody' => $request_body, 'responseBody' => $script_response]);
 			$this->respondJson($json);
 			return;
 		}
+		
 		$this->model_setting_setting->editSettingValue('esputnik', 'esputnik_site_script', $script_response['text']);
 		$json['success'] = true;
+		
 		$this->logApiEvent('GET_SCRIPT_SUCCESS', 'INFO', ['domain' => $domain]);
+		
 		$this->respondJson($json);
 	}
 	
@@ -498,7 +522,7 @@ class ControllerExtensionModuleEsputnik extends Controller {
 		
 		if (empty($response['http_code']) || $response['http_code'] != 200) {
 			$json['error'] = true;
-			$this->logApiEvent('ADD_DOMAIN_FAILED', 'ERROR', ['domain' => $domain, 'requestBody' => $request_body, 'responseBody' => $response]);
+			$this->logApiEvent('ADD_WEB_PUSH_DOMAIN_FAILED', 'ERROR', ['domain' => $domain, 'requestBody' => $request_body, 'responseBody' => $response]);
 			$this->respondJson($json);
 			return;
 		}
@@ -529,6 +553,7 @@ class ControllerExtensionModuleEsputnik extends Controller {
 		$this->load->model('setting/setting');
 		$this->model_setting_setting->editSettingValue('esputnik', 'esputnik_web_push', '1');
 		$this->model_setting_setting->editSettingValue('esputnik', 'esputnik_web_push_script', $script_response['script']);
+		
 		$json['success'] = true;
 		
 		$this->logApiEvent('GET_WEB_PUSH_SCRIPT_SUCCESS', 'INFO', ['domain' => $domain]);
@@ -543,11 +568,13 @@ class ControllerExtensionModuleEsputnik extends Controller {
 
 	private function logApiEvent($message, $level, $data = [], $org_id = null) {
 		$this->load->model('extension/module/esputnik');
+		
 		$log_data = [
 			'data'      => json_encode($data),
 			'message'   => $message,
 			'log_level' => $level,
 		];
+		
 		if ($org_id !== null) {
 			$this->model_extension_module_esputnik->makeLogRequest($log_data, $org_id);
 		} else {
@@ -615,14 +642,19 @@ class ControllerExtensionModuleEsputnik extends Controller {
 			'esputnik_customers_limit'  => 2000,
 			'esputnik_orders_limit'     => 300,
 		];
+		
 		$this->model_setting_setting->editSetting('esputnik', $setting);
+		
 		if (version_compare(VERSION,'3.0.0.0', '>=')) {
 			$this->model_setting_setting->editSetting('module_esputnik', ['module_esputnik_status' => 0]);
 		}
-		$events = $this->getesputnikEvents();
+		
+		$events = $this->getEsputnikEvents();
+		
 		foreach ($events as $code => $value) {
 			$this->addEvent($code, $value['trigger'], $value['action']);
 		}
+		
 		$this->db->query("CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "esputnik_failed_customers` (`id` INT NOT NULL AUTO_INCREMENT , `customer_id` INT NOT NULL , `attempt_count` TINYINT NOT NULL , `last_attempt` DATETIME NOT NULL , PRIMARY KEY (`id`)) ENGINE = InnoDB;");
 		$this->db->query("CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "esputnik_failed_orders` (`id` INT NOT NULL AUTO_INCREMENT , `order_id` INT NOT NULL , `attempt_count` TINYINT NOT NULL , `last_attempt` DATETIME NOT NULL , PRIMARY KEY (`id`)) ENGINE = InnoDB;");
 	}
@@ -630,18 +662,24 @@ class ControllerExtensionModuleEsputnik extends Controller {
 	public function uninstall() {
 		if ($this->user->hasPermission('modify', 'extension/module/esputnik')) {
 			$this->load->model('setting/setting');
+			
 			if (version_compare(VERSION,'3.0.0.0', '>=')) {
 				$this->load->model('setting/event');
 			} else {
 				$this->load->model('extension/event');
 			}
+			
 			$this->model_setting_setting->deleteSetting('esputnik');
+			
 			if (version_compare(VERSION,'3.0.0.0', '>=')) {
 				$this->model_setting_setting->deleteSetting('module_esputnik');
 			}
+			
 			$this->db->query("DROP TABLE IF EXISTS `" . DB_PREFIX . "esputnik_failed_customers`");
 			$this->db->query("DROP TABLE IF EXISTS `" . DB_PREFIX . "esputnik_failed_orders`");
-			$events = $this->getesputnikEvents();
+			
+			$events = $this->getEsputnikEvents();
+			
 			foreach ($events as $code => $value) { 
 				$this->deleteEvent($code);
 			}
@@ -651,6 +689,7 @@ class ControllerExtensionModuleEsputnik extends Controller {
 	private function resetSettings($api_key, $org_id, $org_name) {
 		if ($this->user->hasPermission('modify', 'extension/module/esputnik')) {
 			$this->load->model('setting/setting');
+			
 			$setting = [
 				'esputnik_status'           => '0',
 				'esputnik_api_key'          => $api_key,
@@ -670,7 +709,9 @@ class ControllerExtensionModuleEsputnik extends Controller {
 				'esputnik_customers_limit'  => 2000,
 				'esputnik_orders_limit'     => 300,
 			];
+			
 			$this->model_setting_setting->editSetting('esputnik', $setting);
+			
 			if (version_compare(VERSION, '3.0.0.0', '>=')) {
 				$this->model_setting_setting->editSetting('module_esputnik', ['module_esputnik_status' => 0]);
 			}
@@ -708,7 +749,7 @@ class ControllerExtensionModuleEsputnik extends Controller {
 		}
 	}
 	
-	private function getesputnikEvents() {
+	private function getEsputnikEvents() {
 		$events = [
 			'esputnik_add_customer_admin' => [
 				'trigger' => 'admin/model/customer/customer/addCustomer/after',

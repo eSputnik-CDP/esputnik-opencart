@@ -54,6 +54,7 @@
 			}
 			
 			$route = !empty($this->request->get['route']) ? $this->request->get['route'] : '';
+			
 			$begin_checkout_routes = [
 				'checkout/cart',
 				'checkout/checkout',

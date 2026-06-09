@@ -28,8 +28,6 @@ class ControllerExtensionModuleEsputnik extends Controller {
 			if (!empty($response['http_code']) && in_array((int)$response['http_code'], [429, 500])) {
 				$this->model_extension_module_esputnik->setBadCustomer($customer_info['customer_id']);
 			}
-			
-			return !empty($response['http_code']) && (int)$response['http_code'] < 400;
 		}
 	}
 
@@ -68,6 +66,7 @@ class ControllerExtensionModuleEsputnik extends Controller {
 			if ($order_info) {
 				$in_progress_status = $this->config->get('config_processing_status');
 				$delivered_status = $this->config->get('config_complete_status');
+				
 				$items = [];
 				
 				$product_query = $this->db->query("SELECT * FROM " . DB_PREFIX . "order_product WHERE order_id = '" . (int)$order_id . "'");
@@ -123,13 +122,9 @@ class ControllerExtensionModuleEsputnik extends Controller {
 				
 				if (!empty($response['http_code']) && in_array((int)$response['http_code'], [429, 500])) {
 					$this->model_extension_module_esputnik->setBadOrder($order_info['order_id']);
-					return false;
 				}
-				
-				return true;
 			}
 		}
-		return false;
 	}
 
 	public function checkBadOrdersAndCustomers() {

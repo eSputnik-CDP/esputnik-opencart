@@ -16,6 +16,10 @@ The plugin implements:
 * App Inbox script initialization and authentication token retrieval when the App Inbox toggle is enabled. 
 * Logging of errors and export status
 
+## Supported Languages
+
+The plugin is available in Ukrainian, Polish, Bulgarian, Romanian, Portuguese, Italian, German, French, and Spanish.
+
 ---
 
 ## Plugin Installation

@@ -101,21 +101,92 @@ Authorization is performed using the eSputnik API Key entered in the plugin sett
 
 ---
 
-## Automated APP Inbox Setup
-**Purpose:** Allows you to change the script initialization mode from or to [App Inbox](https://docs.esputnik.com/docs/app-inbox-setting-up)
+# Automated App Inbox Setup
 
----
+## Purpose
 
-#### Implementation:
+App Inbox extends the Yespo site script with support for personalized messages on the storefront. The OpenCart plugin enables the App Inbox initialization mode and provides the Yespo SDK with an authentication token for the currently logged-in customer.
 
-- Stores the enable flag to the database isAppInboxEnabled.
-- Change the script initialization mode to enable or disable App Inbox mode.
+The plugin does not retrieve or render App Inbox messages itself. Message loading and display are handled by the Yespo site script after initialization.
 
-#### Enabling App Inbox mode:
+## Prerequisites
 
-- Open the Yespo app
-- Connect your Yespo account
-- Enable App Inbox mode in the **APP Inbox** section
+App Inbox becomes available in the module settings after:
+
+* the Yespo account is connected using a valid API key;
+* the site domain is registered;
+* the Yespo site tracking script is successfully retrieved.
+
+## Enabling and Disabling App Inbox
+
+The administrator can enable or disable App Inbox in the **App Inbox** section of the Yespo module settings.
+
+The switch sends an AJAX `POST` request to the module controller. The controller:
+
+1. Checks that the administrator has permission to modify the module.
+2. Toggles the `yespo_app_inbox` setting between `1` and `0`.
+3. Stores the new value in the OpenCart settings table.
+4. Logs either an `APP_INBOX_ENABLED` or `APP_INBOX_DISABLED` integration event.
+5. Returns the new status to the admin interface.
+
+App Inbox is disabled by default. Disconnecting or reinstalling the integration resets the setting to the disabled state.
+
+## Storefront Script Initialization
+
+When App Inbox is disabled, the retrieved Yespo site script is added to the storefront without changing its original initialization call.
+
+When App Inbox is enabled, the plugin replaces the standard:
+
+```javascript
+eS('init');
+```
+
+with App Inbox initialization:
+
+```javascript
+eS(
+    'init',
+    { APP_INBOX: true },
+    {
+        getAuthTokenCallback: () => yespoGetAuthToken(),
+        language: '<storefront-language>'
+    }
+);
+```
+
+The language is derived from the current OpenCart storefront language code and converted to a two-letter lowercase value, for example `en`, `uk`, `pl` etc.
+
+The modified script is injected after the opening `<body>` tag through the module's OCMOD modification.
+
+## Customer Authentication Token
+
+When the Yespo SDK calls `getAuthTokenCallback`, the storefront sends a `POST` request to:
+
+```text
+index.php?route=extension/module/yespo/getAppInboxToken
+```
+
+The endpoint issues a token only when the OpenCart customer is logged in. It sends the following customer identifiers to Yespo:
+
+| Yespo API Field | OpenCart Source | Notes |
+|---|---|---|
+| `extid` | Current `customer_id` | Converted to a string |
+| `email` | Current customer email | Sent without transformation |
+| `phone` | Current customer telephone | All non-numeric characters are removed |
+
+**Yespo API method:** `POST /api/v1/auth/contact/token`
+
+The server-to-server request is authenticated using the API key stored in the module settings. If Yespo returns a token, the plugin passes it to the storefront SDK.
+
+For guests, failed requests, or responses without a token, the endpoint returns an empty token and the JavaScript callback resolves with an empty string.
+
+## Implementation Notes
+
+* The API key is used only by the OpenCart backend and is not exposed to storefront JavaScript.
+* A customer token is requested on demand by the Yespo SDK; enabling the option in the admin panel does not generate a token immediately.
+* App Inbox initialization depends on the retrieved site script containing the standard `eS('init');` call.
+* Both OpenCart `.tpl` and `.twig` storefront templates are supported through OCMOD.
+
 
 ---
 
